@@ -1,0 +1,21 @@
+# Normaliza finales de línea para evitar ruido en los diffs
+* text=auto
+
+# Los archivos de solución y proyecto de .NET se mantienen en CRLF (estándar de Visual Studio)
+*.sln   text eol=crlf
+*.slnx  text eol=crlf
+*.csproj text eol=crlf
+*.props text eol=crlf
+*.targets text eol=crlf
+
+# Binarios
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.docx binary
+*.ppsx binary
+*.zip  binary
+*.bundle binary

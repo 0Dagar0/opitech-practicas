@@ -1,0 +1,56 @@
+# --- .NET -------------------------------------------------------------------
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+artifacts/
+project.lock.json
+*.trx
+TestResults/
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+
+# --- Node / TypeScript ------------------------------------------------------
+node_modules/
+dist/
+out/
+build/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+.vite/
+
+# --- Angular ----------------------------------------------------------------
+.angular/
+.cache/
+
+# --- Entorno y secretos -----------------------------------------------------
+.env
+.env.*
+!.env.example
+secrets.json
+appsettings.Local.json
+appsettings.*.local.json
+
+# --- Editores ---------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*~
+
+# --- Sistema operativo ------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini

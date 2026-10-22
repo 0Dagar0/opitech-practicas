@@ -52,7 +52,7 @@ Todos en **C# / .NET 10**.
 | [`01-linq`](practicas/backend/01-linq) | Consultas LINQ sobre colecciones en memoria (`Data/SampleData.cs`) | Consola | `dotnet run --project practicas/backend/01-linq` |
 | [`02-biblioteca-app`](practicas/backend/02-biblioteca-app) | Modelado con interfaces y herencia: materiales, préstamos y usuarios | Consola | `dotnet run --project practicas/backend/02-biblioteca-app` |
 | [`03-payment-system`](practicas/backend/03-payment-system) | Polimorfismo aplicado a medios de pago y procesamiento de órdenes | Consola | `dotnet run --project practicas/backend/03-payment-system` |
-| [`04-refactoring`](practicas/backend/04-refactoring) | Refactorizaciones sucesivas de un mismo código (versiones 1 a 5) | Consola | `dotnet run --project practicas/backend/04-refactoring` |
+| [`04-refactoring`](practicas/backend/04-refactoring) | Ejercicios de refactorización sobre distintos casos de código | Biblioteca | [ver README](practicas/backend/04-refactoring/README.md) |
 | [`05-inyeccion-dependencias`](practicas/backend/05-inyeccion-dependencias) | Registro de servicios con `AddScoped` y repositorio en memoria | Web API | [ver README](practicas/backend/05-inyeccion-dependencias/README.md) |
 | [`06-expense-tracker`](practicas/backend/06-expense-tracker) | API para registrar y consultar gastos | Web API | [ver README](practicas/backend/06-expense-tracker/README.md) |
 | [`07-library-management`](practicas/backend/07-library-management) | Reto de arquitectura: 4 capas, JWT, EF Core + PostgreSQL y pruebas | Web API | [ver README](practicas/backend/07-library-management/README.md) |

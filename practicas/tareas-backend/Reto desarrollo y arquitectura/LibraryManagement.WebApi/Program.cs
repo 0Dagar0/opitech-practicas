@@ -12,6 +12,25 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuración sensible: User Secrets en desarrollo, variables de entorno en despliegue.
+// Nunca se guarda en el appsettings.json versionado.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "Falta 'ConnectionStrings:DefaultConnection'. En desarrollo ejecuta: " +
+        "dotnet user-secrets set \"ConnectionStrings:DefaultConnection\" \"...\". " +
+        "En despliegue define la variable de entorno ConnectionStrings__DefaultConnection.");
+
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32)
+{
+    throw new InvalidOperationException(
+        "Falta 'Jwt:Key' o tiene menos de 32 bytes (HS256 lo exige). " +
+        "Configúrala con User Secrets o con la variable de entorno Jwt__Key.");
+}
+
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
         // Autenticación JWT
 
 builder.Services.AddAuthentication(options =>
@@ -27,10 +46,10 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+            Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 
@@ -79,7 +98,7 @@ builder.Services.AddSwaggerGen(c =>
         // Base de datos
 
 builder.Services.AddDbContext<LibraryDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 
             // Repositorios y servicios

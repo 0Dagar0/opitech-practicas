@@ -1,0 +1,29 @@
+<section id="contacto" class="section">
+    <h2 class="gradient-text">Contáctanos</h2>
+    <form #contactForm="ngForm" (ngSubmit)="enviarFormulario(contactForm)">
+        <label class="campo">
+            <span>Nombre</span>
+            <input type="text" name="nombre" placeholder="Nombre" ngModel required>
+        </label>
+        <label class="campo">
+            <span>Email</span>
+            <input type="email" name="email" placeholder="Email" ngModel required>
+        </label>
+        <label class="campo">
+            <span>Teléfono</span>
+            <input type="tel" name="telefono" placeholder="Teléfono" ngModel>
+        </label>
+        <label class="campo">
+            <span>WhatsApp</span>
+            <input type="text" name="whatsapp" placeholder="WhatsApp" ngModel>
+        </label>
+        <label class="campo">
+            <span>Mensaje</span>
+            <textarea name="mensaje" placeholder="Mensaje" ngModel required></textarea>
+        </label>
+        <button type="submit" class="btn-primary">Enviar mensaje</button>
+    </form>
+    @if (enviado) {
+    <p class="exito">¡Mensaje enviado con éxito! (simulado)</p>
+    }
+</section>

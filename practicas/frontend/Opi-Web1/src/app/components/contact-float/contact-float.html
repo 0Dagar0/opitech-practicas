@@ -1,0 +1,53 @@
+<div class="float-container">
+    <button
+        type="button"
+        class="contact-button"
+        aria-label="Abrir opciones de contacto"
+        aria-controls="menu-contacto"
+        [attr.aria-expanded]="menuOpen"
+        (click)="toggleMenu()"
+    >
+        <i class="fas fa-comment-dots" aria-hidden="true"></i>
+    </button>
+    <div id="menu-contacto" class="contact-menu" [class.open]="menuOpen">
+        <button
+            type="button"
+            class="contact-item"
+            aria-label="Escribir un mensaje"
+            (click)="abrirModal()"
+        >
+            <i class="fas fa-envelope" aria-hidden="true"></i>
+        </button>
+        <a
+            href="https://wa.me/573228806691"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="contact-item"
+            aria-label="WhatsApp"
+        >
+            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+        </a>
+        <a
+            href="https://www.facebook.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="contact-item"
+            aria-label="Facebook"
+        >
+            <i class="fab fa-facebook-f" aria-hidden="true"></i>
+        </a>
+        <a
+            href="https://es.linkedin.com/company/opi-tech"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="contact-item"
+            aria-label="LinkedIn"
+        >
+            <i class="fab fa-linkedin-in" aria-hidden="true"></i>
+        </a>
+    </div>
+</div>
+
+@if (contactoAbierto()) {
+<app-contact-modal (cerrarModal)="cerrarModal()"></app-contact-modal>
+}

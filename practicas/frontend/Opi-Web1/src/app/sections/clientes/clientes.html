@@ -1,0 +1,11 @@
+<section id="clientes" class="section">
+    <h2 class="gradient-text">Nuestros Clientes</h2>
+    <div class="clients-container">
+        @for (c of clientes(); track c.nombre) {
+        <div class="client">
+            <img [src]="c.logo" [alt]="c.nombre">
+            <p>{{ c.nombre }}</p>
+        </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,85 @@
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+body {
+    margin: 0;
+    background-color: #121212;
+    background-image:
+        radial-gradient(ellipse at 20% 40%, rgba(245, 106, 45, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 85% 70%, rgba(98, 44, 167, 0.15) 0%, transparent 60%);
+    /* Asegura que el fondo cubra toda la pantalla sin repetirse */
+    background-attachment: fixed;
+    background-size: cover;
+
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* El layout va en el nivel raíz: antes estaba anidado dentro de body
+   y el navegador lo compilaba como "body html, body body", que no
+   coincide con ningún elemento. */
+html,
+body {
+    height: 100%;
+    padding: 0;
+}
+
+app-root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+}
+
+main {
+    flex: 1;
+}
+
+/* Encabezados con el degradado de la marca. La clase se usaba en las
+   plantillas pero no estaba definida en ningún CSS. */
+.gradient-text {
+    background: linear-gradient(135deg, #ff7e05, #aa2eff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Botones reutilizables por todas las secciones. */
+.btn-primary,
+.btn-secondary {
+    display: inline-block;
+    padding: 0.75rem 1.75rem;
+    border-radius: 30px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ff7e05, #aa2eff);
+    color: #fff;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.btn-primary:hover,
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(255, 126, 5, 0.3);
+}
+
+.btn-secondary:hover {
+    border-color: #ff7e05;
+}
+
+/* Estilos comunes de las páginas interiores (antes estaba duplicado
+   en los cuatro CSS de sección). */
+.section {
+    padding: 4rem 2rem;
+    text-align: center;
+}

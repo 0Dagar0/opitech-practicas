@@ -1,0 +1,12 @@
+<section id="servicios" class="section">
+    <h2 class="gradient-text">Nuestros Servicios</h2>
+    <div class="cards-container">
+        @for (s of servicios(); track s.titulo) {
+        <div class="card">
+            <img [src]="s.imagen" [alt]="s.titulo">
+            <h3>{{ s.titulo }}</h3>
+            <p>{{ s.descripcion }}</p>
+        </div>
+        }
+    </div>
+</section>

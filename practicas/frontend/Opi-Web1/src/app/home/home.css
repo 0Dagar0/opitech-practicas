@@ -1,0 +1,44 @@
+/* Portada: deja aire arriba para la constelación y coloca el texto
+   en la zona baja, para que no se solapen. */
+.hero {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-height: calc(100svh - 92px);
+    padding: 0 1.5rem 12vh;
+    box-sizing: border-box;
+}
+
+.hero-content {
+    max-width: 720px;
+    text-align: center;
+}
+
+.hero-title {
+    margin: 0 0 1rem;
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    line-height: 1.15;
+}
+
+.hero-subtitle {
+    margin: 0 0 2rem;
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: #c9c9d4;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .hero {
+        /* En móvil el header mide 66px (logo más pequeño). */
+        min-height: calc(100svh - 66px);
+        padding-bottom: 16vh;
+    }
+}

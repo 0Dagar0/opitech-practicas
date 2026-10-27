@@ -1,0 +1,50 @@
+{
+    "servicios": [
+    {
+        "titulo": "Desarrollo a medida",
+        "descripcion": "Creamos software que se adapta exactamente a tus procesos.",
+        "imagen": "https://picsum.photos/id/0/300/200"
+    },
+    {
+        "titulo": "Arquitectura en la nube",
+        "descripcion": "Escalable, segura y siempre disponible.",
+        "imagen": "https://picsum.photos/id/1/300/200"
+    },
+    {
+        "titulo": "Soporte 24/7",
+        "descripcion": "Tu negocio nunca duerme, nosotros tampoco.",
+        "imagen": "https://picsum.photos/id/2/300/200"
+    }
+    ],
+    "equipo": [
+    {
+        "nombre": "Ana López",
+        "rol": "CTO",
+        "foto": "https://randomuser.me/api/portraits/women/68.jpg"
+    },
+    {
+        "nombre": "Carlos Ruiz",
+        "rol": "Lead Developer",
+        "foto": "https://randomuser.me/api/portraits/men/32.jpg"
+    },
+    {
+        "nombre": "Marta Gil",
+        "rol": "UX Designer",
+        "foto": "https://randomuser.me/api/portraits/women/44.jpg"
+    }
+    ],
+    "clientes": [
+    {
+        "nombre": "TechGlobal",
+        "logo": "https://picsum.photos/id/20/100/100"
+    },
+    {
+        "nombre": "EcoSolutions",
+        "logo": "https://picsum.photos/id/30/100/100"
+    },
+    {
+        "nombre": "FinBank",
+        "logo": "https://picsum.photos/id/40/100/100"
+    }
+    ]
+}

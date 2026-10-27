@@ -1,0 +1,12 @@
+<section id="equipo" class="section">
+    <h2 class="gradient-text">Nuestro Equipo</h2>
+    <div class="team-container">
+        @for (m of equipo(); track m.nombre) {
+        <div class="team-card">
+            <img [src]="m.foto" [alt]="m.nombre">
+            <h3>{{ m.nombre }}</h3>
+            <p>{{ m.rol }}</p>
+        </div>
+        }
+    </div>
+</section>

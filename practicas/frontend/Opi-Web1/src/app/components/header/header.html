@@ -1,0 +1,21 @@
+<header>
+    <a class="logo" routerLink="/" aria-label="OpiTech, ir a la portada">
+        <img src="assets/icono-opi.ico" alt="">
+        <span>OpiTech</span>
+    </a>
+    <button
+        type="button"
+        class="menu-toggle"
+        aria-label="Abrir menú de navegación"
+        aria-controls="menu-principal"
+        [attr.aria-expanded]="menuAbierto"
+        (click)="toggleMenu()"
+    >
+        &#9776;
+    </button>
+    <nav id="menu-principal" [class.active]="menuAbierto">
+        <a routerLink="/servicios" routerLinkActive="active" (click)="cerrarMenu()">Servicios</a>
+        <a routerLink="/equipo" routerLinkActive="active" (click)="cerrarMenu()">Equipo</a>
+        <a routerLink="/clientes" routerLinkActive="active" (click)="cerrarMenu()">Clientes</a>
+    </nav>
+</header>

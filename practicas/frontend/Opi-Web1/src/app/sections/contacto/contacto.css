@@ -1,0 +1,30 @@
+﻿form {
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    margin: 0 auto;
+    gap: 1rem;
+}
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    text-align: left;
+    font-size: 0.9rem;
+    color: #c9c9d4;
+}
+input, textarea {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ff7e05;
+    background: rgba(0,0,0,0.5);
+    color: white;
+}
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #aa2eff;
+}
+.exito {
+    color: #aa2eff;
+    margin-top: 1rem;
+}

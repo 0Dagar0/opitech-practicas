@@ -2,9 +2,9 @@
 
 Repositorio con los ejercicios, retos y proyectos que desarrollé durante mi **etapa productiva en Opitech** (2026).
 
-Reúne prácticas de backend en **C# / .NET**, frontend en **Angular** y **React**, y ejercicios de **SQL** y **arquitectura por capas**.
+Reúne prácticas de backend en **C# / .NET**, frontend en **Angular** y **React**, ejercicios de **SQL** y **arquitectura por capas**, y los proyectos completos de la etapa en [`Proyectos/`](Proyectos).
 
-> El proyecto final de la etapa (**OpiSupport / Opidesk**) está en desarrollo y se publicará cuando esté terminado.
+> El proyecto final de la etapa (**OpiSupport**) está publicado en [`Proyectos/OpiSupport`](Proyectos/OpiSupport).
 
 ---
 
@@ -13,6 +13,7 @@ Reúne prácticas de backend en **C# / .NET**, frontend en **Angular** y **React
 - [Estructura](#estructura)
 - [Proyectos de backend](#proyectos-de-backend)
 - [Proyectos de frontend](#proyectos-de-frontend)
+- [Proyectos completos](#proyectos-completos)
 - [Requisitos](#requisitos)
 - [Cómo ejecutar](#cómo-ejecutar)
 - [Convenciones](#convenciones)
@@ -36,8 +37,11 @@ opitech-practicas/
 │  │  └─ sql/                         Ejercicios de SQL (clínica)
 │  └─ frontend/
 │     ├─ angular-bills-app/           Angular + NgRx
+│     ├─ Opi-Web1/                    Portada corporativa (Angular)
 │     ├─ react-triqui/                React + Vite
 │     └─ typescript-tarea/            Ejercicio de TypeScript
+├─ Proyectos/
+│  └─ OpiSupport/                     Helpdesk: .NET 8 + React 19 + PostgreSQL
 └─ README.md
 ```
 
@@ -64,8 +68,21 @@ Todos en **C# / .NET 10**.
 | Proyecto | Descripción | Stack |
 |---|---|---|
 | [`angular-bills-app`](practicas/frontend/angular-bills-app) | Gestión de facturas y pagos, con estado global y formularios reactivos | Angular + NgRx |
+| [`Opi-Web1`](practicas/frontend/Opi-Web1) | Portada corporativa de OpiTech, con componentes reutilizables y pruebas | Angular |
 | [`react-triqui`](practicas/frontend/react-triqui) | Juego de tres en línea con hooks personalizados | React + Vite |
 | [`typescript-tarea`](practicas/frontend/typescript-tarea) | Ejercicio de tipado en TypeScript (`index.ts`) | TypeScript |
+
+---
+
+## Proyectos completos
+
+Proyectos de mayor alcance, publicados con backend, frontend y documentación en una misma carpeta.
+
+| Proyecto | Descripción | Stack |
+|---|---|---|
+| [`OpiSupport`](Proyectos/OpiSupport) | Sistema de gestión de tickets de soporte técnico (helpdesk): autenticación JWT, flujo de estados, control de SLA y asignación automática | .NET 8 · React 19 · PostgreSQL |
+
+Cada proyecto incluye su propio `README.md` con requisitos y pasos de ejecución.
 
 ---
 
@@ -75,7 +92,7 @@ Todos en **C# / .NET 10**.
 |---|---|
 | .NET SDK | 10.0 |
 | Node.js | 20 o superior |
-| PostgreSQL | 18 (solo para `07-library-management`) |
+| PostgreSQL | 15 o superior (usada: 18), para `07-library-management` y `OpiSupport` |
 
 ---
 

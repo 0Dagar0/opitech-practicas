@@ -1,0 +1,39 @@
+# ===== .NET =====
+# Salidas de compilación (no se versionan)
+bin/
+obj/
+# Configuración local de Visual Studio / VS Code
+.vs/
+*.user
+*.suo
+*.userosscache
+
+# ===== Node / React =====
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# ===== Registros y temporales =====
+*.log
+npm-debug.log*
+yarn-error.log*
+pids/
+*.pid
+
+# ===== Credenciales =====
+# Los secretos NO viven en el repositorio: se guardan en User Secrets.
+# Si algún día se usa un archivo .env, tampoco se versiona.
+.env
+.env.*
+!.env.example
+
+# ===== Sistema operativo =====
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ===== Copias de seguridad de editores (drawio, Office, etc.) =====
+*.bkp
+*.tmp
+*~

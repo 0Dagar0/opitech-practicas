@@ -5,6 +5,7 @@ using OpiSupport.Application.Commands.CreateUser;
 using OpiSupport.Application.Commands.DisableUser;
 using OpiSupport.Application.Commands.EnableUser;
 using OpiSupport.Application.Commands.UpdateTechnicianSpecialties;
+using OpiSupport.Application.Commands.UpdateUserFullName;
 using OpiSupport.Application.DTOs;
 using OpiSupport.Application.Queries.GetUserList;
 using System.Security.Claims;
@@ -136,6 +137,33 @@ namespace OpiSupport.API.Controllers
             {
                 TechnicianId = id,
                 SpecialtyCategoryIds = specialtyCategoryIds,
+                RequestedByUserId = userId,
+                RequestedByRole = role
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (!result.IsSuccess)
+                return BadRequest(new { message = result.Error });
+
+            return NoContent();
+        }
+
+        [HttpPut("{id}/name")]
+        [Authorize(Roles = "Sistema")]
+        public async Task<IActionResult> UpdateName(int id, [FromBody] UpdateUserNameDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                return Unauthorized(new { message = "Usuario no autenticado" });
+
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+            var role = roleClaim?.Value ?? string.Empty;
+
+            var command = new UpdateUserFullNameCommand
+            {
+                UserId = id,
+                FullName = dto.FullName,
                 RequestedByUserId = userId,
                 RequestedByRole = role
             };

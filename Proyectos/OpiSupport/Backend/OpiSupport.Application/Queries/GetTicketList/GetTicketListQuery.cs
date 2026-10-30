@@ -12,6 +12,13 @@ namespace OpiSupport.Application.Queries.GetTicketList
         public string? Priority { get; set; }
         public int? TechnicianId { get; set; }
         public bool? OnlyOverdue { get; set; }
+
+        /// <summary>
+        /// Si es true, devuelve solo los tickets que no tienen técnico asignado.
+        /// Solo se aplica para los perfiles Supervisor y Sistema.
+        /// </summary>
+        public bool? Unassigned { get; set; }
+
         public int Page { get; set; } = 1;
         public int Size { get; set; } = 10;
     }

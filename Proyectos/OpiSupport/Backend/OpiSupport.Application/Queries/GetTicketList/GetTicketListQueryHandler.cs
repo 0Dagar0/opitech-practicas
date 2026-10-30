@@ -101,6 +101,12 @@ namespace OpiSupport.Application.Queries.GetTicketList
             if (request.TechnicianId.HasValue)
                 query = query.Where(t => t.AssignedToId == request.TechnicianId.Value);
 
+            // Tickets sin asignar: solo lo pueden consultar Supervisor y Sistema.
+            // Para otros roles el filtro se ignora (su consulta ya está limitada a sus propios tickets).
+            if (request.Unassigned.HasValue && request.Unassigned.Value
+                && (request.Role == "Supervisor" || request.Role == "Sistema"))
+                query = query.Where(t => t.AssignedToId == null);
+
             if (request.OnlyOverdue.HasValue && request.OnlyOverdue.Value)
                 query = query.Where(t => t.IsOverdue);
 

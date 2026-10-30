@@ -10,6 +10,7 @@ namespace OpiSupport.Application.DTOs
         public required string Description { get; set; }
         public required string Status { get; set; }
         public required string Priority { get; set; }
+        public int CategoryId { get; set; }
         public required string Category { get; set; }
         public required string Area { get; set; }
         public DateTime CreatedAt { get; set; }

@@ -47,6 +47,7 @@ namespace OpiSupport.Application.Queries.GetTicketDetail
                 Description = ticket.Description,
                 Status = ticket.Status,
                 Priority = ticket.Priority,
+                CategoryId = ticket.CategoryId,
                 Category = ticket.Category?.Name ?? "Sin categoría",
                 Area = ticket.Area?.Name ?? "Sin área",
                 CreatedAt = ticket.CreatedAt,

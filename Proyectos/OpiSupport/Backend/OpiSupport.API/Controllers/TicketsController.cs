@@ -5,6 +5,8 @@ using OpiSupport.Application.Commands.AddComment;
 using OpiSupport.Application.Commands.AssignTicket;
 using OpiSupport.Application.Commands.ChangeTicketStatus;
 using OpiSupport.Application.Commands.CreateTicket;
+using OpiSupport.Application.Commands.UpdateTicketClassification;
+using OpiSupport.Application.DTOs;
 using OpiSupport.Application.Queries.GetTicketDetail;
 using OpiSupport.Application.Queries.GetTicketList;
 using System.Security.Claims;
@@ -125,8 +127,48 @@ namespace OpiSupport.API.Controllers
             return Ok(result.Value);
         }
 
+        /// <summary>
+        /// Cambia la categoría y/o la prioridad de un ticket. Solo el perfil Sistema (SYS).
+        /// El motivo es obligatorio y queda registrado en el historial del ticket.
+        /// Cuerpo esperado: { "categoryId": 2, "priority": "Alta", "reason": "..." }
+        /// </summary>
+        [HttpPut("{id}/classification")]
+        [Authorize(Roles = "Sistema")]
+        public async Task<IActionResult> UpdateClassification(int id, [FromBody] UpdateTicketClassificationDto dto)
+        {
+            // 1. Obtener el ID del usuario desde el token JWT
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                return Unauthorized(new { message = "Usuario no autenticado" });
+
+            // 2. Obtener el rol del usuario desde el token JWT
+            var roleClaim = User.FindFirst(ClaimTypes.Role);
+            var role = roleClaim?.Value ?? string.Empty;
+
+            // 3. Construir el command (la ruta manda sobre el cuerpo)
+            var command = new UpdateTicketClassificationCommand
+            {
+                TicketId = id,
+                CategoryId = dto.CategoryId,
+                Priority = dto.Priority,
+                Reason = dto.Reason,
+                UserId = userId,
+                Role = role
+            };
+
+            // 4. Enviar el command a MediatR
+            var result = await _mediator.Send(command);
+
+            // 5. Manejar el resultado
+            if (!result.IsSuccess)
+                return BadRequest(new { message = result.Error });
+
+            return Ok(result.Value);
+        }
+
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetTicketById(int id)        {
+        public async Task<IActionResult> GetTicketById(int id)
+        {
             // 1. Obtener el ID del usuario desde el token JWT
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))

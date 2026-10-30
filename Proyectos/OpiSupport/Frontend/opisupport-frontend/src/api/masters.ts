@@ -1,12 +1,14 @@
 import apiClient from './client';
 import type { Category, Area } from '../types';
+import { sortCategories } from '../utils/helpers';
 
 /**
- * Obtiene la lista de categorías desde el backend
+ * Obtiene la lista de categorías desde el backend.
+ * Se devuelven ordenadas para presentación (Software, Hardware, Red, ...).
  */
 export const getCategories = async (): Promise<Category[]> => {
   const response = await apiClient.get<Category[]>('/categories');
-  return response.data;
+  return sortCategories(response.data);
 };
 
 /**

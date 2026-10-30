@@ -5,6 +5,7 @@ import { getTicketDetail, changeTicketStatus, addComment } from '../api/tickets'
 import { useAuth } from '../contexts/AuthContext';
 import type { TicketDetail as TicketDetailType } from '../types';
 import ReassignModal from '../components/tickets/ReassignModal';
+import EditClassificationModal from '../components/tickets/EditClassificationModal';
 import { getAvailableTransitions, STATUS_ACTIONS } from '../utils/ticketStatus';
 
 
@@ -21,6 +22,7 @@ const TicketDetail = () => {
     const [activeTab, setActiveTab] = useState<'comments' | 'history'>('comments');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showReassignModal, setShowReassignModal] = useState(false);
+    const [showClassificationModal, setShowClassificationModal] = useState(false);
 
 
     // Cargar ticket
@@ -137,6 +139,8 @@ const TicketDetail = () => {
     const isTechnician = normalizedRole === 'tecnico';
     const isSupervisor = normalizedRole === 'supervisor' || normalizedRole === 'sistema'; // <--- Sistema incluido
     const isColaborador = normalizedRole === 'colaborador';
+    // Solo el perfil Sistema puede cambiar la clasificación (categoría/prioridad)
+    const isSystem = normalizedRole === 'sistema';
 
     // Botones de estado generados desde la tabla de transiciones compartida.
     // Cada rol ve solo las transiciones que puede ejecutar:
@@ -211,6 +215,15 @@ const TicketDetail = () => {
                         className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
                     >
                         Reasignar
+                    </button>
+                )}
+
+                {isSystem && (
+                    <button
+                        onClick={() => setShowClassificationModal(true)}
+                        className="px-4 py-2 border border-brand-primary text-brand-primary rounded-md hover:bg-brand-primary hover:text-white transition-colors"
+                    >
+                        Editar clasificación
                     </button>
                 )}
 
@@ -316,30 +329,53 @@ const TicketDetail = () => {
                         {ticket.history.length === 0 ? (
                             <p className="text-gray-500 text-sm">No hay historial de cambios.</p>
                         ) : (
-                            ticket.history.map((entry, index) => (
-                                <div key={index} className="text-sm border-l-2 border-brand-primary pl-3">
-                                    <p>
-                                        <span className="font-medium">{entry.user}</span>{' '}
-                                        {entry.note ? (
-                                            <>
-                                                {entry.note}
-                                                {entry.previousStatus !== entry.newStatus && (
-                                                    <span className="text-gray-500">
-                                                        {' '}({entry.previousStatus || '—'} → {entry.newStatus})
-                                                    </span>
-                                                )}
-                                            </>
-                                        ) : (
-                                            <>
-                                                cambió de
-                                                <span className="font-medium"> {entry.previousStatus || '—'} </span>
-                                                a <span className="font-medium">{entry.newStatus}</span>
-                                            </>
+                            ticket.history.map((entry, index) => {
+                                // Los cambios de clasificación y las reasignaciones son
+                                // eventos importantes: se resaltan en la línea de tiempo.
+                                const note = entry.note ?? '';
+                                const isClassification = note.startsWith('Clasificación actualizada');
+                                const isReassignment = note.startsWith('Reasignado');
+                                const isHighlighted = isClassification || isReassignment;
+
+                                return (
+                                    <div
+                                        key={index}
+                                        className={
+                                            isHighlighted
+                                                ? 'text-sm border-l-4 border-brand-primary bg-brand-primary/5 pl-3 py-2 rounded-r-md'
+                                                : 'text-sm border-l-2 border-gray-300 pl-3'
+                                        }
+                                    >
+                                        {isHighlighted && (
+                                            <span className="mb-1 inline-block rounded-full bg-brand-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                                                {isClassification
+                                                    ? 'Cambio de clasificación · SYS'
+                                                    : 'Reasignación'}
+                                            </span>
                                         )}
-                                    </p>
-                                    <p className="text-xs text-gray-500">{formatDate(entry.date)}</p>
-                                </div>
-                            ))
+                                        <p>
+                                            <span className="font-medium">{entry.user}</span>{' '}
+                                            {entry.note ? (
+                                                <>
+                                                    {entry.note}
+                                                    {entry.previousStatus !== entry.newStatus && (
+                                                        <span className="text-gray-500">
+                                                            {' '}({entry.previousStatus || '—'} → {entry.newStatus})
+                                                        </span>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    cambió de
+                                                    <span className="font-medium"> {entry.previousStatus || '—'} </span>
+                                                    a <span className="font-medium">{entry.newStatus}</span>
+                                                </>
+                                            )}
+                                        </p>
+                                        <p className="text-xs text-gray-500">{formatDate(entry.date)}</p>
+                                    </div>
+                                );
+                            })
                         )}
                     </div>
                 )}
@@ -347,6 +383,8 @@ const TicketDetail = () => {
             <ReassignModal
                 isOpen={showReassignModal}
                 ticketId={ticket.id}
+                categoryId={ticket.categoryId}
+                categoryName={ticket.category}
                 currentTechnicianId={ticket.assignedToId ?? null}
                 onClose={() => setShowReassignModal(false)}
                 onReassigned={async () => {
@@ -356,6 +394,23 @@ const TicketDetail = () => {
                         setTicket(updated);
                     }
                     setShowReassignModal(false);
+                }}
+            />
+            <EditClassificationModal
+                isOpen={showClassificationModal}
+                ticketId={ticket.id}
+                ticketTitle={ticket.title}
+                currentCategoryId={ticket.categoryId}
+                currentCategoryName={ticket.category}
+                currentPriority={ticket.priority}
+                createdAt={ticket.createdAt}
+                onClose={() => setShowClassificationModal(false)}
+                onUpdated={async () => {
+                    // Recargar el ticket para ver la nueva clasificación y el historial
+                    if (id) {
+                        const updated = await getTicketDetail(parseInt(id));
+                        setTicket(updated);
+                    }
                 }}
             />
         </div>

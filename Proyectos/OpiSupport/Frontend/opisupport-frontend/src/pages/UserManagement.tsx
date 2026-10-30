@@ -7,11 +7,41 @@ import type { Category } from '../types';
 import type { Technician } from '../types';
 import { getUsers, createUser, disableUser, enableUser, getTechnicians } from '../api/users';
 import EditSpecialtiesModal from '../components/common/EditSpecialtiesModal';
+import EditNameModal from '../components/common/EditNameModal';
 
 
+
+/**
+ * Muestra las especialidades de un técnico como "chips" que se reparten
+ * en varias líneas, para que la celda no se vea amontonada.
+ */
+const SpecialtyChips = ({
+    categoryIds,
+    getCategoryName,
+}: {
+    categoryIds: number[];
+    getCategoryName: (categoryId: number) => string;
+}) => {
+    if (categoryIds.length === 0) {
+        return <span className="text-xs italic text-gray-400">Sin especialidades</span>;
+    }
+
+    return (
+        <div className="flex max-w-[240px] flex-wrap gap-1.5">
+            {categoryIds.map((categoryId) => (
+                <span
+                    key={categoryId}
+                    className="inline-flex items-center rounded-full bg-brand-primary/10 px-2.5 py-0.5 text-xs font-medium text-brand-primary ring-1 ring-inset ring-brand-primary/20"
+                >
+                    {getCategoryName(categoryId)}
+                </span>
+            ))}
+        </div>
+    );
+};
 
 const UserManagement = () => {
-    const { state } = useAuth();
+    const { state, updateProfileName } = useAuth();
     const userRole = state.user?.role;
     const isSystem = userRole === 'Sistema';
     const isSupervisor = userRole === 'Supervisor';
@@ -43,6 +73,9 @@ const UserManagement = () => {
 
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [selectedTechnician, setSelectedTechnician] = useState<{ id: number; name: string; specialties: number[] } | null>(null);
+
+    // Edición de nombre (solo perfil Sistema)
+    const [nameModalUser, setNameModalUser] = useState<{ id: number; name: string } | null>(null);
 
     // Cargar usuarios al montar y cuando cambien los filtros
     useEffect(() => {
@@ -120,6 +153,26 @@ const UserManagement = () => {
             setMessage({ type: 'success', text: 'Especialidades actualizadas correctamente.' });
         } catch (error) {
             console.error('Error al recargar técnicos:', error);
+        }
+    };
+
+    // ===== EDITAR NOMBRE (solo Sistema) =====
+    const handleOpenEditName = (userId: number, currentName: string) => {
+        setNameModalUser({ id: userId, name: currentName });
+    };
+
+    const handleNameUpdated = async (newName: string) => {
+        // Si SYS se renombró a sí mismo, se refresca el nombre de la sesión
+        if (nameModalUser && state.user?.id === nameModalUser.id) {
+            updateProfileName(newName);
+        }
+
+        try {
+            const data = await getUsers({});
+            setUsers(data);
+            setMessage({ type: 'success', text: 'Nombre actualizado correctamente.' });
+        } catch (error) {
+            console.error('Error al recargar usuarios:', error);
         }
     };
 
@@ -217,7 +270,7 @@ const UserManagement = () => {
     });
 
     return (
-        <div className="p-6 max-w-6xl mx-auto">
+        <div className="mx-auto max-w-7xl p-6">
             <h1 className="text-2xl font-bold text-brand-primary mb-6">Administración de Usuarios</h1>
 
             {message && (
@@ -368,82 +421,86 @@ const UserManagement = () => {
                 ) : visibleUsers.length === 0 ? (
                     <div className="text-center text-gray-500">No hay usuarios que coincidan con los filtros.</div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto rounded-lg border border-gray-100">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Correo</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Especialidades</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                    <th className="w-14 px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">ID</th>
+                                    <th className="min-w-[160px] px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nombre</th>
+                                    <th className="w-28 px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Código</th>
+                                    <th className="min-w-[180px] px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Correo</th>
+                                    <th className="w-28 px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Rol</th>
+                                    <th className="min-w-[240px] px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Especialidades</th>
+                                    <th className="w-24 px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Estado</th>
+                                    <th className="min-w-[230px] px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="divide-y divide-gray-200 bg-white">
                                 {visibleUsers.map((user) => {
                                     const isSelf = state.user?.id === user.id;
                                     const canDisable =
                                         (isSystem) ||
                                         (isSupervisor && (user.role === 'Colaborador' || user.role === 'Tecnico'));
                                     const showAction = canDisable && !isSelf;
+                                    const technician = techniciansWithSpecialties.find(t => t.id === user.id);
+                                    const hasAnyAction = (user.role === 'Tecnico' && canManage) || showAction || isSystem;
 
                                     return (
                                         <tr key={user.id} className="hover:bg-gray-50">
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{user.id}</td>
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{user.fullName}</td>
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{user.employeeCode}</td>
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{user.email || 'N/A'}</td>
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{user.role}</td>
+                                            <td className="px-3 py-3 align-top text-sm text-gray-500">{user.id}</td>
+                                            <td className="px-3 py-3 align-top text-sm font-medium text-gray-900">{user.fullName}</td>
+                                            <td className="px-3 py-3 align-top text-sm text-gray-700">{user.employeeCode}</td>
+                                            <td className="px-3 py-3 align-top text-sm text-gray-700">{user.email || 'N/A'}</td>
+                                            <td className="px-3 py-3 align-top text-sm text-gray-700">{user.role}</td>
 
                                             {/*CELDA DE ESPECIALIDADES*/}
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                            <td className="px-3 py-3 align-top text-sm">
                                                 {user.role === 'Tecnico' ? (
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {(() => {
-                                                            const tech = techniciansWithSpecialties.find(t => t.id === user.id);
-                                                            if (tech && tech.specialties && tech.specialties.length > 0) {
-                                                                return tech.specialties.map((catId) => (
-                                                                    <span
-                                                                        key={catId}
-                                                                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-brand-primary bg-opacity-10 text-brand-primary"
-                                                                    >
-                                                                        {getCategoryName(catId)}
-                                                                    </span>
-                                                                ));
-                                                            }
-                                                            return <span className="text-gray-400 text-xs">Sin especialidades</span>;
-                                                        })()}
-                                                    </div>
+                                                    <SpecialtyChips
+                                                        categoryIds={technician?.specialties ?? []}
+                                                        getCategoryName={getCategoryName}
+                                                    />
                                                 ) : (
-                                                    <span className="text-gray-400 text-xs">N/A</span>
+                                                    <span className="text-xs text-gray-400">N/A</span>
                                                 )}
                                             </td>
 
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm">
-                                                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                            <td className="px-3 py-3 align-top text-sm">
+                                                <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                                     {user.isActive ? 'Activo' : 'Inactivo'}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-2 whitespace-nowrap text-sm">
-                                                {user.role === 'Tecnico' && (isSystem || isSupervisor) && (
-                                                    <button
-                                                        onClick={() => handleOpenEditSpecialties(user.id, user.fullName)}
-                                                        className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-xs mr-2"
-                                                    >
-                                                        Editar especialidades
-                                                    </button>
-                                                )}
-                                                {showAction && (
-                                                    <button
-                                                        onClick={() => handleToggleUserStatus(user.id, user.isActive)}
-                                                        disabled={actionLoading === user.id}
-                                                        className={`px-3 py-1 rounded-md text-white text-xs transition-colors ${user.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} disabled:opacity-50`}
-                                                    >
-                                                        {actionLoading === user.id ? 'Procesando...' : user.isActive ? 'Inhabilitar' : 'Habilitar'}
-                                                    </button>
+                                            <td className="px-3 py-3 align-top text-sm">
+                                                {hasAnyAction ? (
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        {isSystem && (
+                                                            <button
+                                                                onClick={() => handleOpenEditName(user.id, user.fullName)}
+                                                                className="whitespace-nowrap rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
+                                                            >
+                                                                Editar nombre
+                                                            </button>
+                                                        )}
+                                                        {user.role === 'Tecnico' && canManage && (
+                                                            <button
+                                                                onClick={() => handleOpenEditSpecialties(user.id, user.fullName)}
+                                                                className="whitespace-nowrap rounded-md bg-blue-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-600"
+                                                            >
+                                                                Editar especialidades
+                                                            </button>
+                                                        )}
+                                                        {showAction && (
+                                                            <button
+                                                                onClick={() => handleToggleUserStatus(user.id, user.isActive)}
+                                                                disabled={actionLoading === user.id}
+                                                                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium text-white transition-colors disabled:opacity-50 ${user.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+                                                            >
+                                                                {actionLoading === user.id ? 'Procesando...' : user.isActive ? 'Inhabilitar' : 'Habilitar'}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs text-gray-400">—</span>
                                                 )}
                                             </td>
                                         </tr>
@@ -462,6 +519,15 @@ const UserManagement = () => {
                     currentSpecialties={selectedTechnician.specialties}
                     onClose={() => setEditModalOpen(false)}
                     onUpdated={handleSpecialtiesUpdated}
+                />
+            )}
+            {nameModalUser && (
+                <EditNameModal
+                    isOpen={true}
+                    userId={nameModalUser.id}
+                    currentName={nameModalUser.name}
+                    onClose={() => setNameModalUser(null)}
+                    onUpdated={handleNameUpdated}
                 />
             )}
         </div>

@@ -25,6 +25,7 @@ type AuthAction =
     | { type: 'SET_LOADING'; payload: boolean }
     | { type: 'LOGIN_SUCCESS'; payload: User }
     | { type: 'LOGIN_ERROR'; payload: string }
+    | { type: 'UPDATE_USER_NAME'; payload: string }
     | { type: 'LOGOUT' };
 
 // ========== 3. CREAR EL REDUCER ==========
@@ -48,6 +49,11 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
                 isAuthenticated: false,
                 user: null,
             };
+        case 'UPDATE_USER_NAME':
+            // Solo cambia el nombre mostrado; la sesión sigue igual.
+            return state.user
+                ? { ...state, user: { ...state.user, fullName: action.payload } }
+                : state;
         case 'LOGOUT':
             return {
                 ...state,
@@ -66,6 +72,8 @@ interface AuthContextType {
     state: AuthState;
     login: (identifier: string, password: string) => Promise<void>;
     logout: () => void;
+    /** Actualiza el nombre del usuario en sesión (por ejemplo, al renombrarse a sí mismo). */
+    updateProfileName: (fullName: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -111,11 +119,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         dispatch({ type: 'LOGOUT' });
     };
 
-    // ===== 5.3 Valor del contexto =====
+    // ===== 5.3 Actualizar el nombre del usuario en sesión =====
+    const updateProfileName = (fullName: string) => {
+        dispatch({ type: 'UPDATE_USER_NAME', payload: fullName });
+
+        const storedUser = getStoredUser();
+        if (storedUser) {
+            localStorage.setItem('user', JSON.stringify({ ...storedUser, fullName }));
+        }
+    };
+
+    // ===== 5.4 Valor del contexto =====
     const value: AuthContextType = {
         state,
         login,
         logout,
+        updateProfileName,
     };
 
     return (

@@ -4,6 +4,7 @@ import type {
     CreateTicketRequest,
     TicketDetail,
     TicketListItem,
+    TicketPriority,
     PaginatedResponse
 } from '../types';
 
@@ -15,6 +16,8 @@ export const getTickets = async (params?: {
     priority?: string;
     technicianId?: number;
     onlyOverdue?: boolean;
+    /** Solo tickets sin técnico asignado (Supervisor y Sistema). */
+    unassigned?: boolean;
     page?: number;
     size?: number;
 }): Promise<PaginatedResponse<TicketListItem>> => {
@@ -68,9 +71,21 @@ export const assignTicket = async (id: number, technicianId: number): Promise<Ti
 
 /**
  * Agrega un comentario a un ticket
- */
-export const addComment = async (ticketId: number, text: string): Promise<any> => {
+ */export const addComment = async (ticketId: number, text: string): Promise<any> => {
     const response = await apiClient.post(`/tickets/${ticketId}/comments`, { text });
     console.log('📝 Comentario creado (respuesta):', response.data);
+    return response.data;
+};
+
+/**
+ * Cambia la categoría y/o la prioridad de un ticket.
+ * Solo el perfil Sistema (SYS) tiene permiso en el backend.
+ * El motivo es obligatorio y queda resaltado en el historial del ticket.
+ */
+export const updateTicketClassification = async (
+    id: number,
+    data: { categoryId: number; priority: TicketPriority; reason: string }
+): Promise<TicketDetail> => {
+    const response = await apiClient.put<TicketDetail>(`/tickets/${id}/classification`, data);
     return response.data;
 };

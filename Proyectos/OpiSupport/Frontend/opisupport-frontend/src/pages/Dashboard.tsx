@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { getTickets } from '../api/tickets';
 import { getTechnicians } from '../api/users';
 import { useAuth } from '../contexts/AuthContext';
+import PriorityBadge from '../components/tickets/PriorityBadge';
 import type { TicketListItem, Technician } from '../types';
 
 
@@ -34,9 +35,9 @@ const Dashboard = () => {
     const [totalItems, setTotalItems] = useState(0);
     const pageSize = 10;
 
-    // ===== Cargar técnicos (solo Supervisores) =====
+    // ===== Cargar técnicos (Supervisor y Sistema) =====
     useEffect(() => {
-        if (userRole === 'Supervisor') {
+        if (userRole === 'Supervisor' || userRole === 'Sistema') {
             const loadTechnicians = async () => {
                 try {
                     const data = await getTechnicians();
@@ -57,7 +58,10 @@ const Dashboard = () => {
             const response = await getTickets({
                 status: statusFilter || undefined,
                 priority: priorityFilter || undefined,
-                technicianId: technicianFilter ? parseInt(technicianFilter) : undefined,
+                technicianId: technicianFilter && technicianFilter !== 'unassigned'
+                    ? parseInt(technicianFilter, 10)
+                    : undefined,
+                unassigned: technicianFilter === 'unassigned' ? true : undefined,
                 onlyOverdue: onlyOverdue || undefined,
                 page: currentPage,
                 size: pageSize,
@@ -182,8 +186,8 @@ const Dashboard = () => {
                     </select>
                 </div>
 
-                {/* Técnico (solo Supervisor) */}
-                {userRole === 'Supervisor' && (
+                {/* Técnico (Supervisor y Sistema) */}
+                {(userRole === 'Supervisor' || userRole === 'Sistema') && (
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Técnico</label>
                         <select
@@ -192,6 +196,7 @@ const Dashboard = () => {
                             className="mt-1 block w-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary"
                         >
                             <option value="">Todos</option>
+                            <option value="unassigned">Sin asignar</option>
                             {technicians.map((tech) => (
                                 <option key={tech.id} value={tech.id}>
                                     {tech.fullName}
@@ -277,7 +282,9 @@ const Dashboard = () => {
                                                     {ticket.status}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ticket.priority}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <PriorityBadge priority={ticket.priority} />
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ticket.category}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {ticket.assignedToFullName || 'Sin asignar'}

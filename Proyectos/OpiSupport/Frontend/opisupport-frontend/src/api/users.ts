@@ -48,3 +48,11 @@ export const enableUser = async (userId: number): Promise<void> => {
 export const updateTechnicianSpecialties = async (userId: number, categoryIds: number[]): Promise<void> => {
     await apiClient.put(`/users/${userId}/specialties`, categoryIds);
 };
+
+/**
+ * Cambia el nombre completo de un usuario.
+ * Solo el perfil Sistema (SYS) tiene permiso en el backend.
+ */
+export const updateUserName = async (userId: number, fullName: string): Promise<void> => {
+    await apiClient.put(`/users/${userId}/name`, { fullName });
+};

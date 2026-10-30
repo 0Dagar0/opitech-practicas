@@ -75,6 +75,7 @@ export interface TicketDetail {
     description: string;
     status: TicketStatus;
     priority: TicketPriority;
+    categoryId: number;
     category: string;
     area: string;
     createdAt: string;

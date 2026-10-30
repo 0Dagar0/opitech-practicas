@@ -36,6 +36,9 @@ builder.Services.AddScoped<IAreaRepository, AreaRepository>();
 builder.Services.AddScoped<IStatusHistoryRepository, StatusHistoryRepository>();
 builder.Services.AddScoped<ITechnicianSpecialtyRepository, TechnicianSpecialtyRepository>();
 
+// Servicio compartido de asignación automática (creación de tickets y cambio de categoría)
+builder.Services.AddScoped<OpiSupport.Application.Services.TicketAssignmentService>();
+
 // 2. Registrar AuthService
 builder.Services.AddScoped<IAuthService, AuthService>();
 

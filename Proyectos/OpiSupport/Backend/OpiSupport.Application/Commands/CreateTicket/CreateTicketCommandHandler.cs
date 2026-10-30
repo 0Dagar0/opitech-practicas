@@ -2,6 +2,7 @@
 using OpiSupport.Application.DTOs;
 using OpiSupport.Application.Interfaces;
 using OpiSupport.Application.Interfaces.Repositories;
+using OpiSupport.Application.Services;
 using OpiSupport.Application.Shared;
 using OpiSupport.Domain.Entities;
 
@@ -14,19 +15,22 @@ namespace OpiSupport.Application.Commands.CreateTicket
         private readonly ICategoryRepository _categoryRepository;
         private readonly IStatusHistoryRepository _statusHistoryRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly TicketAssignmentService _assignmentService;
 
         public CreateTicketCommandHandler(
             ITicketRepository ticketRepository,
             IUserRepository userRepository,
             ICategoryRepository categoryRepository,
             IStatusHistoryRepository statusHistoryRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            TicketAssignmentService assignmentService)
         {
             _ticketRepository = ticketRepository;
             _userRepository = userRepository;
             _categoryRepository = categoryRepository;
             _statusHistoryRepository = statusHistoryRepository;
             _unitOfWork = unitOfWork;
+            _assignmentService = assignmentService;
         }
 
         public async Task<Result<TicketResponseDto>> Handle(CreateTicketCommand request, CancellationToken cancellationToken)
@@ -49,11 +53,12 @@ namespace OpiSupport.Application.Commands.CreateTicket
                 return Result<TicketResponseDto>.Failure("Usuario no encontrado.");
 
             // 5. Calcular SLA_Deadline según prioridad
-            var slaDeadline = CalculateSlaDeadline(request.Priority);
+            var slaDeadline = SlaCalculator.CalculateDeadline(DateTime.UtcNow, request.Priority);
             Console.WriteLine($"🔍 SLA_Deadline calculado: {slaDeadline} para prioridad: {request.Priority}");
 
             // 6. Buscar técnico disponible para esta categoría
-            var technicianId = await FindAvailableTechnicianAsync(request.CategoryId, cancellationToken);
+            var technician = await _assignmentService.FindAvailableTechnicianAsync(request.CategoryId, cancellationToken);
+            var technicianId = technician?.Id;
 
             // 7. Crear el ticket
             var ticket = new Ticket
@@ -108,51 +113,6 @@ namespace OpiSupport.Application.Commands.CreateTicket
             };
 
             return Result<TicketResponseDto>.Success(responseDto);
-        }
-
-        private DateTime CalculateSlaDeadline(string priority)
-        {
-            return priority switch
-            {
-                "Crítica" => DateTime.UtcNow.AddHours(2),
-                "Alta" => DateTime.UtcNow.AddHours(4),
-                "Media" => DateTime.UtcNow.AddHours(8),
-                "Baja" => DateTime.UtcNow.AddHours(24),
-                _ => DateTime.UtcNow.AddHours(24)
-            };
-        }
-
-        private async Task<int?> FindAvailableTechnicianAsync(int categoryId, CancellationToken cancellationToken)
-        {
-            // 1. Obtener todos los técnicos activos con sus especialidades
-            var technicians = await _userRepository.GetAllActiveTechniciansAsync(cancellationToken);
-
-            // 2. Filtrar técnicos que tengan la especialidad de la categoría
-            var filteredTechnicians = technicians
-                .Where(t => t.Specialties != null && t.Specialties.Any(s => s.CategoryId == categoryId))
-                .ToList();
-
-            if (!filteredTechnicians.Any())
-                return null; // No hay técnicos con esa especialidad
-
-            // 3. Obtener el límite máximo de tickets por técnico desde la configuración
-            // (En una implementación completa, usarías un repositorio de SystemConfig)
-            int maxTickets = 5; // Valor por defecto
-
-            // 4. Para cada técnico, contar cuántos tickets activos tiene
-            var availableTechnician = filteredTechnicians
-                .Select(t => new
-                {
-                    Technician = t,
-                    ActiveTicketsCount = _ticketRepository.GetQueryable()
-                        .Count(tk => tk.AssignedToId == t.Id &&
-                                     new[] { "Abierto", "Asignado", "En Proceso" }.Contains(tk.Status))
-                })
-                .Where(x => x.ActiveTicketsCount < maxTickets)
-                .OrderBy(x => x.ActiveTicketsCount)
-                .FirstOrDefault();
-
-            return availableTechnician?.Technician.Id;
         }
     }
 }

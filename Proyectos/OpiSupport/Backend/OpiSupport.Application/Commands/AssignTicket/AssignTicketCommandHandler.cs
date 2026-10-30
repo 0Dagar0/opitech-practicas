@@ -11,17 +11,20 @@ namespace OpiSupport.Application.Commands.AssignTicket
     {
         private readonly ITicketRepository _ticketRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ITechnicianSpecialtyRepository _specialtyRepository;
         private readonly IStatusHistoryRepository _statusHistoryRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public AssignTicketCommandHandler(
             ITicketRepository ticketRepository,
             IUserRepository userRepository,
+            ITechnicianSpecialtyRepository specialtyRepository,
             IStatusHistoryRepository statusHistoryRepository,
             IUnitOfWork unitOfWork)
         {
             _ticketRepository = ticketRepository;
             _userRepository = userRepository;
+            _specialtyRepository = specialtyRepository;
             _statusHistoryRepository = statusHistoryRepository;
             _unitOfWork = unitOfWork;
         }
@@ -42,20 +45,30 @@ namespace OpiSupport.Application.Commands.AssignTicket
             if (technician == null || !technician.IsActive || technician.Role != "Tecnico")
                 return Result<TicketDetailDto>.Failure("El técnico especificado no es válido o no está activo");
 
-            // 4. Guardar el estado y el técnico anteriores (para el historial)
+            // 4. El técnico debe tener la especialidad (categoría) del ticket.
+            //    Es la misma regla que usa la asignación automática al crear el ticket.
+            var specialties = await _specialtyRepository.GetByTechnicianIdAsync(technician.Id, cancellationToken);
+            if (!specialties.Any(s => s.CategoryId == ticket.CategoryId))
+            {
+                var categoryName = ticket.Category?.Name ?? "Sin categoría";
+                return Result<TicketDetailDto>.Failure(
+                    $"El técnico {technician.FullName} no tiene la especialidad requerida por el ticket ({categoryName}).");
+            }
+
+            // 5. Guardar el estado y el técnico anteriores (para el historial)
             var previousStatus = ticket.Status;
             var previousTechnicianName = ticket.AssignedToUser?.FullName ?? "Sin asignar";
 
-            // 5. Asignar el nuevo técnico
+            // 6. Asignar el nuevo técnico
             ticket.AssignedToId = technician.Id;
 
-            // 6. Regla acordada: si el ticket estaba Abierto pasa a Asignado.
+            // 7. Regla acordada: si el ticket estaba Abierto pasa a Asignado.
             //    En cualquier otro estado (Asignado, En Proceso, Reabierto, Resuelto, Cerrado)
             //    se conserva el estado actual.
             if (ticket.Status == "Abierto")
                 ticket.Status = "Asignado";
 
-            // 7. Registrar la reasignación en el historial del ticket
+            // 8. Registrar la reasignación en el historial del ticket
             var history = new StatusHistory
             {
                 TicketId = ticket.Id,
@@ -67,13 +80,13 @@ namespace OpiSupport.Application.Commands.AssignTicket
             };
             await _statusHistoryRepository.AddAsync(history, cancellationToken);
 
-            // 8. Guardar cambios
+            // 9. Guardar cambios
             //    La entidad ya está siendo rastreada por EF Core (GetByIdAsync usa el mismo DbContext),
             //    pero se marca explícitamente como modificada para que quede claro en el código.
             _ticketRepository.Update(ticket);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 9. Devolver el detalle actualizado
+            // 10. Devolver el detalle actualizado
             var updatedTicket = await _ticketRepository.GetByIdAsync(ticket.Id, cancellationToken);
 
             return Result<TicketDetailDto>.Success(new TicketDetailDto
@@ -83,6 +96,7 @@ namespace OpiSupport.Application.Commands.AssignTicket
                 Description = updatedTicket.Description,
                 Status = updatedTicket.Status,
                 Priority = updatedTicket.Priority,
+                CategoryId = updatedTicket.CategoryId,
                 Category = updatedTicket.Category?.Name ?? "Sin categoría",
                 Area = updatedTicket.Area?.Name ?? "Sin área",
                 CreatedAt = updatedTicket.CreatedAt,
